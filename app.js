@@ -15,3 +15,9 @@ app.get('/', async function (req, res) {
 
     res.render("homePage");
 });
+
+
+
+app.listen(port, () => {
+    console.log("connected");
+});
