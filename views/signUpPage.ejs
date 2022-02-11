@@ -6,11 +6,11 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Housemates - Home</title>
+    <title>Housemates - Sign Up</title>
 
 
     <link href="/public/assets/nav.css" type="text/css" rel="stylesheet">
-    <link href="/public/assets/homePage.css" type="text/css" rel="stylesheet">
+    <link href="/public/assets/signUp.css" type="text/css" rel="stylesheet">
 
   </head>
 
@@ -19,33 +19,29 @@
     <header>
       <div class="header">
         <h1>Housemates</h1>
-        <p>A webapp to help keep households organizeda.</p>
+        <p>Create an Account.</p>
       </div>
     </header>
 
     <div class="navbar">
-      <a href="/" class="active">Home</a>
-      <a href="/signUp">Sign Up</a>
+      <a href="/" >Home</a>
+      <a href="/signUp" class="active">Sign Up</a>
       <a href="/logIn" >Log In</a>
     </div>
     
     <div class="main">
-      <h2>Clean House</h2>
-      <h5>By Parent 11:30am 1/09/2025</h5>
-        <p>We are hosting a party at our house tonight and I am going to need everyones help to clean the house</p>
-        <p></p>
-        <br>
+      <form method="POST" action="/signUpUser">
+        <h2>Sign Up</h2>
+        <input type="text" name="name" placeholder="Username"> <br>
+        <input type="text" name="pass" placeholder="Password"> <br>
+        <button type="submit" class="button-4" role="button">Sign Up</button>
+      </form>
+      <br>
     </div>
     
 
     <footer class="text-muted"> 
-      <div class="container">
-      <p>This project is just for practice not made to hold any important info</p>
-      <p>Created by Nathan Latronica, https://github.com/nathanlatronica/Housemates2.0</p>
-        <p class="float-right">
-          <a href="#">Back to top</a>
-        </p>
-      </div>
+
     </footer>
 
     <!-- Bootstrap core JavaScript
