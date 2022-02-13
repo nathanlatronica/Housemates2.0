@@ -6,11 +6,11 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Housemates - Join Group</title>
+    <title>Housemates - Home</title>
 
 
     <link href="/public/assets/nav.css" type="text/css" rel="stylesheet">
-    <link href="/public/assets/signUp.css" type="text/css" rel="stylesheet">
+    <link href="/public/assets/group.css" type="text/css" rel="stylesheet">
 
   </head>
 
@@ -19,30 +19,25 @@
     <header>
       <div class="header">
         <h1>Housemates</h1>
-        <p>It looks like you haven't joined a group yet.</p>
+        <p> Group <%= user[0].groupName %>'s Feed.</p>
       </div>
     </header>
 
     <div class="navbar">
-      <a href="/" class="active">Home</a>
+      <a href="/groupPage" class="active">Feed Page</a>
+      <a href="/">Log Out</a>
+      <form action="/createPost" method="POST">
+        <button type="submit" class="btn-link" >Create Post</button>
+      </form>
+      <p class ="loggedInAs">Logged in as <%= user[0].username %>   </p>
     </div>
     
     <div class="main">
-        <form action="/jOrC" method="POST">
-            <h2>Join Or Create a group</h2>
-
-            <input type="hidden" name="name" value="<%= user[0].username %>">
-
-            <input type="text" name="gName" placeholder="Group Name"> <br>
-            <input type="text" name="gPass" placeholder="Group Password"> <br>
-
-            <input type="radio" name="jOrC" value="join">
-            <label for="html">Join Group</label>
-            <input type="radio" name="jOrC" value="create">
-            <label for="css">Create Group</label><br>
-
-            <button type="submit" class="button-4" role="button">Submit</button>
-        </form>
+      <h2>Clean House</h2>
+      <h5>By Parent 11:30am 1/09/2025</h5>
+        <p>We are hosting a party at our house tonight and I am going to need everyones help to clean the house</p>
+        <p></p>
+        <br>
     </div>
     
 

@@ -33,12 +33,31 @@ app.post('/signUpUser',  async function (req, res) {
 
 app.post('/logInUser',  async function (req, res) {
     let user = await getUser(req.body);
-
+    
     if(user[0].groupName == "none") {
-        res.render("noGroupPage")
+        res.render("noGroupPage", {"user":user})
     } else {
-        res.render("logInPage") //change later
+        res.render("groupPage", {"user":user}) 
     }
+
+});
+
+
+app.post('/jOrC',  async function (req, res) {
+    let user = await getUsername(req.body);
+
+
+    let choice = req.body.jOrC
+    
+    if(choice == "create") {
+        let makeGroup = await createGroup(req.body)
+        let updateUser = await addGroupToUser(req.body)
+    } else if(choice == "join") {
+        let updateUser = await addGroupToUser(req.body)
+    }
+
+
+    res.render("noGroupPage", {"user":user} )
 
 });
 
@@ -48,8 +67,10 @@ app.listen(port, () => {
 });
 
 // ----------------FUNCTIONS-----------------------------------------------------
+//careful about needing passord and what not
 
-function signUpUser(body){ // This function submits the user info to the DB like name, email, linkedIn....etc
+
+function signUpUser(body){ // This signs up a user with no group
    
     let conn = dbConnection();
      return new Promise(function(resolve, reject){
@@ -71,7 +92,27 @@ function signUpUser(body){ // This function submits the user info to the DB like
      });//promise 
   }
 
-function getUser(body){ // This function submits the user info to the DB like name, email, linkedIn....etc
+function getUsername(body){ // This gets a user  
+   
+    let conn = dbConnection();
+     return new Promise(function(resolve, reject){
+         conn.connect(function(err) {
+            if (err) throw err;       
+            let sql = `Select * FROM users
+                       WHERE username = ? `;
+         
+            let params = [body.name];
+            conn.query(sql, params, function (err, rows, fields) {
+               if (err) throw err;
+               //res.send(rows);
+               conn.end();
+               resolve(rows);
+            });
+         
+         });//connect
+     });//promise 
+  }
+  function getUser(body){ // This gets a user  
    
     let conn = dbConnection();
      return new Promise(function(resolve, reject){
@@ -80,7 +121,27 @@ function getUser(body){ // This function submits the user info to the DB like na
             let sql = `Select * FROM users
                        WHERE username = ? AND password = ?`;
          
-            let params = [body.name, body.pass, "none"];
+            let params = [body.name, body.pass];
+            conn.query(sql, params, function (err, rows, fields) {
+               if (err) throw err;
+               //res.send(rows);
+               conn.end();
+               resolve(rows);
+            });
+         
+         });//connect
+     });//promise 
+  }
+  function getGroupInfo(body){ // This gets a user  
+   
+    let conn = dbConnection();
+     return new Promise(function(resolve, reject){
+         conn.connect(function(err) {
+            if (err) throw err;       
+            let sql = `Select * FROM households
+                       WHERE gName = ?`;
+         
+            let params = [body.name];
             conn.query(sql, params, function (err, rows, fields) {
                if (err) throw err;
                //res.send(rows);
@@ -92,6 +153,49 @@ function getUser(body){ // This function submits the user info to the DB like na
      });//promise 
   }
 
+  function addGroupToUser(body){ // This function sets a user to a group
+   
+    let conn = dbConnection();
+     return new Promise(function(resolve, reject){
+         conn.connect(function(err) {
+            if (err) throw err;       
+            let sql = `UPDATE users
+                       SET groupName =? 
+                       WHERE username =?`;
+         
+            let params = [body.gName, body.name];
+            conn.query(sql, params, function (err, rows, fields) {
+               if (err) throw err;
+               //res.send(rows);
+               conn.end();
+               resolve(rows);
+            });
+         
+         });//connect
+     });//promise 
+  }
+
+  function createGroup(body){ // This function sets a user to a group
+   
+    let conn = dbConnection();
+     return new Promise(function(resolve, reject){
+         conn.connect(function(err) {
+            if (err) throw err;       
+            let sql = `INSERT INTO households
+                       (gName, gPassword)
+                       VALUES (?,?)`;
+         
+            let params = [body.gName, body.gPass];
+            conn.query(sql, params, function (err, rows, fields) {
+               if (err) throw err;
+               //res.send(rows);
+               conn.end();
+               resolve(rows);
+            });
+         
+         });//connect
+     });//promise 
+  }
 
 
 function dbConnection(){
@@ -118,6 +222,24 @@ function dbSetup() {
       }
   
     })
+
+    var createGroups = 'CREATE TABLE IF NOT EXISTS households (id INT NOT NULL AUTO_INCREMENT, gName VARCHAR(50), gPassword VARCHAR(75), PRIMARY KEY (id));'
+    connection.query(createGroups, function (err, rows, fields) {
+      if (err) {
+        throw err
+      }
+  
+    })
+
+    var createPosts = 'CREATE TABLE IF NOT EXISTS posts (id INT NOT NULL AUTO_INCREMENT, gName VARCHAR(50), pTitle VARCHAR(50), pDes VARCHAR(250), user VARCHAR(50), stamp DATETIME  PRIMARY KEY (id));'
+    connection.query(createGroups, function (err, rows, fields) {
+      if (err) {
+        throw err
+      }
+  
+    })
+
+    connection.end();
 }
 
 dbSetup();
