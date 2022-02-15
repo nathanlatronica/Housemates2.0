@@ -6,11 +6,11 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Housemates - Home</title>
+    <title>Housemates - Create Post</title>
 
 
     <link href="/public/assets/nav.css" type="text/css" rel="stylesheet">
-    <link href="/public/assets/group.css" type="text/css" rel="stylesheet">
+    <link href="/public/assets/createPost.css" type="text/css" rel="stylesheet">
 
   </head>
 
@@ -18,39 +18,40 @@
 
     <header>
       <div class="header">
-        <h1>Housemates</h1>
-        <p> Group <%= user[0].groupName %>'s Feed.</p>
+        <h1>Create A Post</h1>
       </div>
     </header>
 
     <div class="navbar">
-      <form method="POST">
-        <input type="hidden" name="name" value="<%= user[0].username %>">
-        <button type="submit" formaction="/sendGroupPage" class="btn-link" >Feed Page</button>
-        <button type="submit" formaction="/createPost" class="btn-link" >Create Post</button>
-        <button type="submit" formaction="/logOut" class="btn-link" >Log Out</button>
-
-        <p class ="loggedInAs">Logged in as <%= user[0].username %>   </p>
-      </form>
+        <form method="POST">
+          <input type="hidden" name="name" value="<%= user[0].username %>">
+          <button type="submit" formaction="/sendGroupPage" class="btn-link" >Feed Page</button>
+          <button type="submit" formaction="/createPost" class="btn-link" >Create Post</button>
+          <button type="submit" formaction="/logOut" class="btn-link" >Log Out</button>
+  
+          <p class ="loggedInAs">Logged in as <%= user[0].username %>   </p>
+        </form>
     </div>
     
     <div class="main">
-      <h2>Clean House</h2>
-      <h5>By Parent 11:30am 1/09/2025</h5>
-        <p>We are hosting a party at our house tonight and I am going to need everyones help to clean the house</p>
-        <p></p>
-        <br>
+      <form method="POST" action="/insertPost">
+        <h2>Create</h2>
+        <input type="hidden" name="name" value="<%= user[0].username %>">
+
+        <input type="text" name="pTitle" placeholder="Title"> <br>
+        <input type="text" name="pDes" placeholder="Description"> <br>
+        <input type="text" name="pTime" placeholder="Time  4:30pm"> <br>
+        <input type="text" name="pDate" placeholder="Date 2022-3-24"> <br>
+
+
+        <button type="submit" class="button-4" role="button">Create</button>
+      </form>
+      <br>
     </div>
     
 
     <footer class="text-muted"> 
-      <div class="container">
-      <p>This project is just for practice not made to hold any important info</p>
-      <p>Created by Nathan Latronica, https://github.com/nathanlatronica/Housemates2.0</p>
-        <p class="float-right">
-          <a href="#">Back to top</a>
-        </p>
-      </div>
+
     </footer>
 
     <!-- Bootstrap core JavaScript

@@ -1,8 +1,10 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const mysql = require('mysql')
-const port = process.env.PORT || 3000
+const mysql = require('mysql');
+const { type } = require('express/lib/response');
+const { DATE } = require('mysql/lib/protocol/constants/types');
 const app = express();
+const port = process.env.PORT || 3000
 
 app.set('view engine', 'ejs');
 app.use(express.static("public")); //folder for images, css, js
@@ -10,66 +12,111 @@ app.use('/public', express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
+
 app.get('/',  function (req, res) {
 
-    res.render("homePage");
+   res.render("homePage");
 });
+
+app.post('/logOut',  function (req, res) {
+
+   res.render("homePage");
+});
+
 app.get('/logIn',  function (req, res) {
 
-    res.render("logInPage");
+   res.render("logInPage");
 });
 
 app.get('/signUp', function (req, res) {
 
-    res.render("signUpPage");
+   res.render("signUpPage");
 });
 
 app.post('/signUpUser',  async function (req, res) {
-    console.log(req.body)
-    let user = await signUpUser(req.body);
+   console.log(req.body)
+   let user = await signUpUser(req.body);
 
-    res.render("logInPage");
+   res.render("logInPage");
 });
 
 app.post('/logInUser',  async function (req, res) {
-    let user = await getUser(req.body);
-    
-    if(user[0].groupName == "none") {
-        res.render("noGroupPage", {"user":user})
-    } else {
-        res.render("groupPage", {"user":user}) 
-    }
+   let user = await getUser(req.body);
+
+   if(user[0].groupName == "none") {
+      res.render("noGroupPage", {"user":user})
+   } else {
+      let posts = await getGroupInfo(user[0]);
+      res.render("groupPage", {"user":user, "posts":posts}) 
+   }
 
 });
 
+app.post('/sendGroupPage',  async function (req, res) {
+   let user = await getUsername(req.body);
+   let posts = await getGroupInfo(user[0]);
+   console.log(posts)
+   
+   res.render("groupPage", {"user":user, "posts":posts});
+   
+});
 
 app.post('/jOrC',  async function (req, res) {
-    let user = await getUsername(req.body);
+   let user = await getUsername(req.body);
 
 
-    let choice = req.body.jOrC
-    
-    if(choice == "create") {
-        let makeGroup = await createGroup(req.body)
-        let updateUser = await addGroupToUser(req.body)
-    } else if(choice == "join") {
-        let updateUser = await addGroupToUser(req.body)
-    }
+   let choice = req.body.jOrC
+   
+   if(choice == "create") {
+       let makeGroup = await createGroup(req.body)
+       let updateUser = await addGroupToUser(req.body)
+   } else if(choice == "join") {
+       let updateUser = await addGroupToUser(req.body)
+   }
 
+   let posts = await getGroupInfo(user[0]);
 
-    res.render("noGroupPage", {"user":user} )
+   res.render("groupPage", {"user":user, "posts":posts} )
 
 });
 
+app.post("/createPost", async function(req,res) {
+   let user = await getUsername(req.body);
+   res.render("createpostPage", {"user":user}) 
+
+});
+
+app.post("/insertPost", async function(req,res) {
+   let user = await getUsername(req.body);
+   let DATETIME = getDateTime(req.body.pDate, req.body.pTime);
+   let rows = insertDateTime(user[0], DATETIME, req.body);
+
+   let posts = await getGroupInfo(user[0]);
+
+   res.render("groupPage", {"user":user, "posts":posts}) 
+
+});
 
 app.listen(port, () => {
-    console.log("connected");
+  console.log("connected");
 });
 
-// ----------------FUNCTIONS-----------------------------------------------------
-//careful about needing passord and what not
+// ---------------- NON DATA BASE FUNCTIONS ----------------------------------
+function getDateTime(date, time) {
+   let check = time.slice(-2)
+   time = time.slice(0,-2)
+   myArray = time.split(":")
 
+   if(check == "pm") {
+      let hour = parseInt(myArray[0])
+      hour += 12
+      time = hour + ":" + myArray[1] + ":00"
+   } 
+   dateTime = date + " " + time
+   return dateTime
+}
 
+// ----------------DATA BASE FUNCTIONS-------------------------------------------
 function signUpUser(body){ // This signs up a user with no group
    
     let conn = dbConnection();
@@ -90,7 +137,7 @@ function signUpUser(body){ // This signs up a user with no group
          
          });//connect
      });//promise 
-  }
+}
 
 function getUsername(body){ // This gets a user  
    
@@ -111,8 +158,9 @@ function getUsername(body){ // This gets a user
          
          });//connect
      });//promise 
-  }
-  function getUser(body){ // This gets a user  
+}
+
+function getUser(body){ // This gets a user  
    
     let conn = dbConnection();
      return new Promise(function(resolve, reject){
@@ -131,17 +179,18 @@ function getUsername(body){ // This gets a user
          
          });//connect
      });//promise 
-  }
-  function getGroupInfo(body){ // This gets a user  
+}
+
+function getGroupInfo(user){ // This gets a user  
    
     let conn = dbConnection();
      return new Promise(function(resolve, reject){
          conn.connect(function(err) {
             if (err) throw err;       
-            let sql = `Select * FROM households
+            let sql = `Select * FROM posts
                        WHERE gName = ?`;
          
-            let params = [body.name];
+            let params = [user.groupName];
             conn.query(sql, params, function (err, rows, fields) {
                if (err) throw err;
                //res.send(rows);
@@ -151,9 +200,9 @@ function getUsername(body){ // This gets a user
          
          });//connect
      });//promise 
-  }
+}
 
-  function addGroupToUser(body){ // This function sets a user to a group
+function addGroupToUser(body){ // This function sets a user to a group
    
     let conn = dbConnection();
      return new Promise(function(resolve, reject){
@@ -173,9 +222,9 @@ function getUsername(body){ // This gets a user
          
          });//connect
      });//promise 
-  }
+}
 
-  function createGroup(body){ // This function sets a user to a group
+function createGroup(body){ // This function sets a user to a group
    
     let conn = dbConnection();
      return new Promise(function(resolve, reject){
@@ -195,8 +244,29 @@ function getUsername(body){ // This gets a user
          
          });//connect
      });//promise 
-  }
+}
 
+function insertDateTime(user, DATETIME, body){ // This function sets a user to a group
+   
+   let conn = dbConnection();
+    return new Promise(function(resolve, reject){
+        conn.connect(function(err) {
+           if (err) throw err;       
+           let sql = `INSERT INTO posts
+                      (gName, pTitle, pDes, user, stamp)
+                      VALUES (?,?,?,?,?)`;
+        
+           let params = [user.groupName, body.pTitle, body.pDes, user.username, DATETIME];
+           conn.query(sql, params, function (err, rows, fields) {
+              if (err) throw err;
+              //res.send(rows);
+              conn.end();
+              resolve(rows);
+           });
+        
+        });//connect
+    });//promise 
+}
 
 function dbConnection(){
     let connection = mysql.createConnection({
@@ -231,8 +301,8 @@ function dbSetup() {
   
     })
 
-    var createPosts = 'CREATE TABLE IF NOT EXISTS posts (id INT NOT NULL AUTO_INCREMENT, gName VARCHAR(50), pTitle VARCHAR(50), pDes VARCHAR(250), user VARCHAR(50), stamp DATETIME  PRIMARY KEY (id));'
-    connection.query(createGroups, function (err, rows, fields) {
+    var createPosts = 'CREATE TABLE IF NOT EXISTS posts (id INT NOT NULL AUTO_INCREMENT, gName VARCHAR(50), pTitle VARCHAR(50), pDes VARCHAR(250), user VARCHAR(50), stamp DATETIME,  PRIMARY KEY (id));'
+    connection.query(createPosts, function (err, rows, fields) {
       if (err) {
         throw err
       }
@@ -243,3 +313,5 @@ function dbSetup() {
 }
 
 dbSetup();
+
+
