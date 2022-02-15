@@ -83,7 +83,7 @@ app.post('/jOrC',  async function (req, res) {
 
 app.post("/createPost", async function(req,res) {
    let user = await getUsername(req.body);
-   res.render("createpostPage", {"user":user}) 
+   res.render("createPostPage", {"user":user}) 
 
 });
 
