@@ -35,11 +35,18 @@
     </div>
     
     <div class="main">
-      <h2>Clean House</h2>
-      <h5>By Parent 11:30am 1/09/2025</h5>
-        <p>We are hosting a party at our house tonight and I am going to need everyones help to clean the house</p>
-        <p></p>
-        <br>
+
+
+      <% for(var i = 0; i < posts.length; i++) { %>
+      <div class="blocks">
+        <h2><%= posts[i].pTitle %></h2>
+        <h5>By <%= posts[i].user %> <%= posts[i].stamp %>></h5>
+          <p><%= posts[i].pDes %></p>
+          <br>
+      </div>
+
+      <% } %>
+      
     </div>
     
 

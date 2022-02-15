@@ -47,6 +47,7 @@ app.post('/logInUser',  async function (req, res) {
       res.render("noGroupPage", {"user":user})
    } else {
       let posts = await getGroupInfo(user[0]);
+      console.log(posts)
       res.render("groupPage", {"user":user, "posts":posts}) 
    }
 
@@ -188,7 +189,8 @@ function getGroupInfo(user){ // This gets a user
          conn.connect(function(err) {
             if (err) throw err;       
             let sql = `Select * FROM posts
-                       WHERE gName = ?`;
+                       WHERE gName = ?
+                       ORDER BY stamp`;
          
             let params = [user.groupName];
             conn.query(sql, params, function (err, rows, fields) {
