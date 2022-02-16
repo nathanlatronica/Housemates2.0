@@ -1,8 +1,3 @@
-/* Main column */
-* {
-  box-sizing: border-box;
-}
-
 /* Style the body */
 body {
   font-family: Arial, Helvetica, sans-serif;
@@ -22,13 +17,6 @@ body {
   font-size: 40px;
 }
   
-.main {   
-  -ms-flex: 70%; /* IE10 */
-  flex: 70%;
-  background-color: white;
-  padding: 20px;
-}
-
 .loggedInAs {
   float: right;
   color: white;
@@ -43,4 +31,36 @@ body {
   color: #ffffff;
   font-family: inherit;
   font-size: inherit;
+}
+
+.blocks {
+  margin: auto ;
+  width: 60%;
+  box-shadow: inset 1px 2px 8px rgba(0, 0, 0, 0.07);
+
+}
+
+.title {
+  text-align: center;
+  padding-top: 2%;
+  
+}
+
+.by {
+  margin:auto;
+  padding-left: 35%;
+  padding-right: 2%;
+  float: left;
+}
+
+.stamp {
+  margin: auto;
+  padding-right: 35%;
+  padding-left: 2%;
+  float: right;
+}
+
+.des {
+  padding-top: 2%;
+  text-align: center;
 }

@@ -1,8 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const mysql = require('mysql');
-const { type } = require('express/lib/response');
-const { DATE } = require('mysql/lib/protocol/constants/types');
+
 const app = express();
 const port = process.env.PORT || 3000
 
@@ -47,7 +46,7 @@ app.post('/logInUser',  async function (req, res) {
       res.render("noGroupPage", {"user":user})
    } else {
       let posts = await getGroupInfo(user[0]);
-      console.log(posts)
+      editPosts(posts);
       res.render("groupPage", {"user":user, "posts":posts}) 
    }
 
@@ -56,8 +55,8 @@ app.post('/logInUser',  async function (req, res) {
 app.post('/sendGroupPage',  async function (req, res) {
    let user = await getUsername(req.body);
    let posts = await getGroupInfo(user[0]);
-   console.log(posts)
-   
+   editPosts(posts);
+
    res.render("groupPage", {"user":user, "posts":posts});
    
 });
@@ -76,6 +75,7 @@ app.post('/jOrC',  async function (req, res) {
    }
 
    let posts = await getGroupInfo(user[0]);
+   editPosts(posts);
 
    res.render("groupPage", {"user":user, "posts":posts} )
 
@@ -89,11 +89,14 @@ app.post("/createPost", async function(req,res) {
 
 app.post("/insertPost", async function(req,res) {
    let user = await getUsername(req.body);
-   let DATETIME = getDateTime(req.body.pDate, req.body.pTime);
-   let rows = insertDateTime(user[0], DATETIME, req.body);
+
+   let stamp = new Date()
+   stamp = getDateTime(req.body.pDate, req.body.pTime);
+   let rows = insertDateTime(user[0], stamp, req.body);
 
    let posts = await getGroupInfo(user[0]);
-
+   editPosts(posts);
+ 
    res.render("groupPage", {"user":user, "posts":posts}) 
 
 });
@@ -106,15 +109,24 @@ app.listen(port, () => {
 function getDateTime(date, time) {
    let check = time.slice(-2)
    time = time.slice(0,-2)
+
    myArray = time.split(":")
 
    if(check == "pm") {
       let hour = parseInt(myArray[0])
       hour += 12
-      time = hour + ":" + myArray[1] + ":00"
+      time = hour + ":" + myArray[1] 
    } 
-   dateTime = date + " " + time
+
+   let dateTime =  new Date(date + " " + time);
    return dateTime
+}
+
+function editPosts(posts) {
+
+   for(var i = 0; i < posts.length; i++) {
+      posts[i]["pDate"] = posts[i].stamp.toDateString()
+   }
 }
 
 // ----------------DATA BASE FUNCTIONS-------------------------------------------
@@ -255,10 +267,10 @@ function insertDateTime(user, DATETIME, body){ // This function sets a user to a
         conn.connect(function(err) {
            if (err) throw err;       
            let sql = `INSERT INTO posts
-                      (gName, pTitle, pDes, user, stamp)
-                      VALUES (?,?,?,?,?)`;
+                      (gName, pTitle, pDes, user, stamp, pTime)
+                      VALUES (?,?,?,?,?,?)`;
         
-           let params = [user.groupName, body.pTitle, body.pDes, user.username, DATETIME];
+           let params = [user.groupName, body.pTitle, body.pDes, user.username, DATETIME, body.pTime];
            conn.query(sql, params, function (err, rows, fields) {
               if (err) throw err;
               //res.send(rows);
@@ -303,7 +315,7 @@ function dbSetup() {
   
     })
 
-    var createPosts = 'CREATE TABLE IF NOT EXISTS posts (id INT NOT NULL AUTO_INCREMENT, gName VARCHAR(50), pTitle VARCHAR(50), pDes VARCHAR(250), user VARCHAR(50), stamp DATETIME,  PRIMARY KEY (id));'
+    var createPosts = 'CREATE TABLE IF NOT EXISTS posts (id INT NOT NULL AUTO_INCREMENT, gName VARCHAR(50), pTitle VARCHAR(50), pDes VARCHAR(250), user VARCHAR(50), stamp DATETIME, pTime VARCHAR(25),  PRIMARY KEY (id));'
     connection.query(createPosts, function (err, rows, fields) {
       if (err) {
         throw err

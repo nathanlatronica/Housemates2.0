@@ -34,31 +34,34 @@
       </form>
     </div>
     
-    <div class="main">
 
+  <% for(var i = 0; i < posts.length; i++) { %>
+  <div class="blocks">
+    <h2 class="title"><%= posts[i].pTitle %></h2>
 
-      <% for(var i = 0; i < posts.length; i++) { %>
-      <div class="blocks">
-        <h2><%= posts[i].pTitle %></h2>
-        <h5>By <%= posts[i].user %> <%= posts[i].stamp %>></h5>
-          <p><%= posts[i].pDes %></p>
-          <br>
-      </div>
-
-      <% } %>
-      
+    <div class=" grouped">
+      <h5 class="by">By <%= posts[i].user %> </h5> 
+      <h5 class="stamp"> On <%= posts[i].pDate %> at <%= posts[i].pTime %>  </h5>
     </div>
+    <br>
+    
+    <p class="des"><%= posts[i].pDes %></p>
+    <br>
+  </div>
+
+  <% } %>
+    
     
 
-    <footer class="text-muted"> 
-      <div class="container">
-      <p>This project is just for practice not made to hold any important info</p>
-      <p>Created by Nathan Latronica, https://github.com/nathanlatronica/Housemates2.0</p>
-        <p class="float-right">
-          <a href="#">Back to top</a>
-        </p>
-      </div>
-    </footer>
+  <footer class="text-muted"> 
+    <div class="container">
+    <p>This project is just for practice not made to hold any important info</p>
+    <p>Created by Nathan Latronica, https://github.com/nathanlatronica/Housemates2.0</p>
+      <p class="float-right">
+        <a href="#">Back to top</a>
+      </p>
+    </div>
+  </footer>
 
     <!-- Bootstrap core JavaScript
     ================================================== -->
