@@ -1,6 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const mysql = require('mysql');
+const { NULL } = require('mysql/lib/protocol/constants/types');
 
 const app = express();
 const port = process.env.PORT || 3000
@@ -23,27 +24,45 @@ app.post('/logOut',  function (req, res) {
 });
 
 app.get('/logIn',  function (req, res) {
-
-   res.render("logInPage");
+   let message = " "
+   res.render("logInPage", {"message":message});
 });
 
 app.get('/signUp', function (req, res) {
-
-   res.render("signUpPage");
+   let message = " "
+   res.render("signUpPage", {"message":message});
 });
 
 app.post('/signUpUser',  async function (req, res) {
-   console.log(req.body)
-   let user = await signUpUser(req.body);
+   let exists = await getUser(req.body);
 
-   res.render("logInPage");
+   if(exists.length > 0) {
+      let message = "That username is already taken"
+      res.render("signUpPage", {"message":message})
+   } else if(req.body.pass.length == 0 || req.body.name.length == 0) {
+      let message = "Missing one or more fields"
+      res.render("signUpPage", {"message":message})   
+   } else {
+      let user = await signUpUser(req.body);
+      let message = " "
+      res.render("logInPage", {"message":message});
+   }
+
+
 });
 
 app.post('/logInUser',  async function (req, res) {
    let user = await getUser(req.body);
+   console.log(user)
 
-   if(user[0].groupName == "none") {
-      res.render("noGroupPage", {"user":user})
+   if (user.length == 0) {
+      let message = "One or more fields is incorrect"
+      res.render("logInPage", {"message":message})
+
+   } else if(user[0].groupName == "none") {
+      let message = " "
+      res.render("noGroupPage", {"user":user, "message":message})
+
    } else {
       let posts = await getGroupInfo(user[0]);
       editPosts(posts);
@@ -63,15 +82,29 @@ app.post('/sendGroupPage',  async function (req, res) {
 
 app.post('/jOrC',  async function (req, res) {
    let user = await getUsername(req.body);
-
-
+   let group = await groupExists(req.body)
    let choice = req.body.jOrC
+
+   if(typeof choice === 'undefined') {
+      let message = "You must choose an option"
+      res.render("noGroupPage", {"user":user, "message":message})
+   }
+
+   if(choice == "create" && group.length > 0) {
+      let message = "That group name already exists"
+      res.render("noGroupPage", {"user":user, "message":message})
+
+   } else if(choice == "create") {
+      let makeGroup = await createGroup(req.body)
+      let updateUser = await addGroupToUser(req.body)
+      
+   } else if(choice == "join" && group.length < 1) {
+      let message = "One or more fields was incorrect"
+      res.render("noGroupPage", {"user":user, "message":message})
    
-   if(choice == "create") {
-       let makeGroup = await createGroup(req.body)
-       let updateUser = await addGroupToUser(req.body)
    } else if(choice == "join") {
-       let updateUser = await addGroupToUser(req.body)
+      let updateUser = await addGroupToUser(req.body)
+
    }
 
    let posts = await getGroupInfo(user[0]);
@@ -92,7 +125,7 @@ app.post("/insertPost", async function(req,res) {
 
    let stamp = new Date()
    stamp = getDateTime(req.body.pDate, req.body.pTime);
-   let rows = insertDateTime(user[0], stamp, req.body);
+   let rows =  await insertPost(user[0], stamp, req.body);
 
    let posts = await getGroupInfo(user[0]);
    editPosts(posts);
@@ -194,6 +227,27 @@ function getUser(body){ // This gets a user
      });//promise 
 }
 
+function groupExists(body){ // This gets a user  
+   
+   let conn = dbConnection();
+    return new Promise(function(resolve, reject){
+        conn.connect(function(err) {
+           if (err) throw err;       
+           let sql = `Select * FROM households
+                      WHERE gName = ? `;
+        
+           let params = [body.gName];
+           conn.query(sql, params, function (err, rows, fields) {
+              if (err) throw err;
+              //res.send(rows);
+              conn.end();
+              resolve(rows);
+           });
+        
+        });//connect
+    });//promise 
+}
+
 function getGroupInfo(user){ // This gets a user  
    
     let conn = dbConnection();
@@ -260,7 +314,7 @@ function createGroup(body){ // This function sets a user to a group
      });//promise 
 }
 
-function insertDateTime(user, DATETIME, body){ // This function sets a user to a group
+function insertPost(user, DATETIME, body){ // This function sets a user to a group
    
    let conn = dbConnection();
     return new Promise(function(resolve, reject){
